@@ -14,14 +14,17 @@ const init = async () => {
     const gqlServer = new ApolloServer({
         typeDefs: `
             type Query {
-                hello: String
+                hello: String,
                 getName(name: String): String,
+                getLastName(lastName:String): String
             }
         `, // Schema
         resolvers: {
             Query: {
                 hello: () => 'Hello I am graphql Server',
                 getName: (_, { name }: { name: String }) => `Hi ${name}!`,
+                getLastName: (_, { lastName }: { lastName: String }) =>
+                    `Hi ${lastName}!`,
             },
         }, //
     });

@@ -1,6 +1,14 @@
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
+import { prismaClient } from './lib/db';
+
+type User = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+};
 
 const init = async () => {
     const app = express();
@@ -18,6 +26,9 @@ const init = async () => {
                 getName(name: String): String,
                 getLastName(lastName:String): String
             }
+            type Mutation {
+                createUser(firstName: String!, lastName: String!, email: String!, password: String!): Boolean
+            }
         `, // Schema
         resolvers: {
             Query: {
@@ -25,6 +36,23 @@ const init = async () => {
                 getName: (_, { name }: { name: String }) => `Hi ${name}!`,
                 getLastName: (_, { lastName }: { lastName: String }) =>
                     `Hi ${lastName}!`,
+            },
+            Mutation: {
+                createUser: async (
+                    _,
+                    { firstName, lastName, email, password }: User
+                ) => {
+                    await prismaClient.user.create({
+                        data: {
+                            email,
+                            firstName,
+                            lastName,
+                            password,
+                            salt: 'random_salt',
+                        },
+                    });
+                    return true;
+                },
             },
         }, //
     });
